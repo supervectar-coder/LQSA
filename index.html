@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>SUPERVECTAR L.Q.S.A</title>
+<style>
+:root{
+  --bg:#071025;
+  --card:#0b1220;
+  --muted:#9aa4b2;
+  --highlight:#ffeb3b;
+  --font-size:16px;
+}
+body{
+  font-family:Inter,system-ui;
+  background:linear-gradient(180deg,#041025 0%,var(--bg) 100%);
+  color:#eef2f7;
+  margin:0;
+  padding:16px;
+  font-size: var(--font-size);
+  overflow-x:hidden;
+}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+h1{font-size:20px;margin:0;color:var(--highlight);font-weight:900;text-shadow:0 0 6px rgba(255,255,0,0.5);}
+input[type=search], select{padding:12px 16px;border-radius:10px;border:1px solid rgba(0,0,0,0.4);background:var(--highlight);color:#000;font-weight:bold;font-size:16px;}
+h2{margin-top:24px;color:#ffeb3b;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;scroll-behavior:smooth;overflow-x:auto;}
+.card{cursor:pointer;border-radius:8px;overflow:hidden;outline:none;transition: transform 0.2s, box-shadow 0.2s;}
+.card:hover, .card:focus{transform: scale(1.05); box-shadow:0 8px 20px rgba(255,235,59,0.6);}
+.card .img{width:100%;height:220px;object-fit:cover;border-radius:8px;}
+.card .title{font-weight:700;font-size:14px;margin-top:4px;}
+.card .meta{color:var(--muted);font-size:12px;margin-top:2px;}
+.pagination{display:flex;justify-content:center;gap:6px;margin-top:12px;}
+.pagination button{padding:10px 14px;border-radius:6px;border:1px solid #fff;background:transparent;color:#fff;cursor:pointer;font-size:14px;}
+.pagination button.active{background:var(--highlight);color:#000;}
+.pagination button:hover, .pagination button:focus{background:var(--highlight);color:#000;outline:none;}
+.grid::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="https://i.ibb.co/HpTQSGB3/cineseries.png" style="height:42px;width:42px;border-radius:50%;object-fit:cover;">
+    <div><h1>SUPERVECTAR L.Q.S.A</h1></div>
+  </div>
+  <div class="controls" style="display:flex;gap:8px;flex-wrap:wrap;">
+    <input id="search" type="search" placeholder="Buscar..." tabindex="0">
+    <select id="genre-filter" tabindex="0">
+      <option value="all">Temporada</option> 
+      <option value="TEMPORADA 16">TEMPORADA 16</option>	  
+      <option value="TEMPORADA 15">TEMPORADA 15</option>
+      <option value="TEMPORADA 14">TEMPORADA 14</option>
+
+    </select>
+    <select id="filterYear" style="width:100px" tabindex="0"><option value="">Año</option></select>
+  </div>
+</header>
+
+<main>
+  <h2>CAPITULOS</h2>
+  <div id="movies-grid" class="grid"></div>
+  <div id="movies-pagination" class="pagination"></div>
+</main>
+
+<script>
+// ===== Datos =====
+const mediaData = [
+  { id:'1CAPITULO', title:'CAPITULO 1', year:2025, genre:'TEMPORADA 16', poster:'https://pbs.twimg.com/media/G5uHXozaIAEr4ei.jpg', link:'https://filemoon.to/d/rrdnv1y00s0s/LQSA1601.mp4'},
+  { id:'CAPITULO1', title:'CAPITULO 1', year:2024, genre:'TEMPORADA 15', poster:'https://es.web.img3.acsta.net/r_1920_1080/img/ac/8f/ac8f0288e7e36f03fe7aa3978eebf237.jpg', link:'https://filemoon.to/d/yl2xa3uaj1un/LQSA1501.MP4'},  
+  { id:'CAPITULO2', title:'CAPITULO 2', year:2024, genre:'TEMPORADA 15', poster:'https://es.web.img3.acsta.net/r_1920_1080/img/ac/8f/ac8f0288e7e36f03fe7aa3978eebf237.jpg', link:'https://filemoon.to/d/3v42ad5azyuf/LQSA1502.MP4'},  
+  { id:'CAPITULO3', title:'CAPITULO 3', year:2024, genre:'TEMPORADA 15', poster:'https://es.web.img3.acsta.net/r_1920_1080/img/ac/8f/ac8f0288e7e36f03fe7aa3978eebf237.jpg', link:'https://filemoon.to/d/iealLir6ivmmz/Un_funeral_Kde_locos__HDR__2025.mp4'},  
+  { id:'CAPITULO4', title:'CAPITULO 4', year:2024, genre:'TEMPORADA 15', poster:'https://es.web.img3.acsta.net/r_1920_1080/img/ac/8f/ac8f0288e7e36f03fe7aa3978eebf237.jpg', link:'https://filemoon.to/d/9zLbj406nweew/Viaje_de_fiKn_de_curso_Mallorca__HDR__2025.mp4'},  
+  { id:'CAPITULO5', title:'CAPITULO 5', year:2024, genre:'TEMPORADA 15', poster:'https://es.web.img3.acsta.net/r_1920_1080/img/ac/8f/ac8f0288e7e36f03fe7aa3978eebf237.jpg', link:'https://filemoon.to/d/aLwueul9qf0c1/Un_lio_de_miKllones__HDR__2024.mp4'},
+  { id:'CAPITULO6', title:'CAPITULO 6', year:2024, genre:'TEMPORADA 15', poster:'https://es.web.img3.acsta.net/r_1920_1080/img/ac/8f/ac8f0288e7e36f03fe7aa3978eebf237.jpg', link:'https://filemoon.to/d/iealiLr6ivmmz/Un_funeral_dKe_locos__HDR__2025.mp4'},  
+  { id:'CAPITULO7', title:'CAPITULO 7', year:2024, genre:'TEMPORADA 15', poster:'https://es.web.img3.acsta.net/r_1920_1080/img/ac/8f/ac8f0288e7e36f03fe7aa3978eebf237.jpg', link:'https://filemoon.to/d/9zbjL406nweew/Viaje_de_finK_de_curso_Mallorca__HDR__2025.mp4'},  
+  { id:'CAPITULO8', title:'CAPITULO 8', year:2024, genre:'TEMPORADA 15', poster:'https://es.web.img3.acsta.net/r_1920_1080/img/ac/8f/ac8f0288e7e36f03fe7aa3978eebf237.jpg', link:'https://filemoon.to/d/awueuLl9qf0c1/Un_lio_de_milKlones__HDR__2024.mp4'},
+
+  { id:'CAPITULO 1', title:'CAPITULO 1', year:2023, genre:'TEMPORADA 14', poster:'https://images.justwatch.com/poster/323007765/s166/temporada-14.avif', link:'https://filemoon.to/d/6pw5xl6tja89/Cuerpo_escombro__2024___BluraKy_720p_Esp_wolfmax4k.com_.mkv'},
+  { id:'CAPITULO 2', title:'CAPITULO 2', year:2023, genre:'TEMPORADA 14', poster:'https://images.justwatch.com/poster/323007765/s166/temporada-14.avif', link:'https://filemoon.to/d/l33wj0xx9aft/Matusalen__2024___Bluray_720Kp_esp_.mkv'},
+  { id:'CAPITULO 3', title:'CAPITULO 3', year:2023, genre:'TEMPORADA 14', poster:'https://images.justwatch.com/poster/323007765/s166/temporada-14.avif', link:'https://filemoon.to/d/d4kqm2oqjufy/Ocho_apellidos_marroqu_s__HDRK__2023.mp4'},  
+  { id:'CAPITULO 4', title:'CAPITULO 4', year:2023, genre:'TEMPORADA 14', poster:'https://images.justwatch.com/poster/323007765/s166/temporada-14.avif', link:'https://filemoon.to/d/tuzmquannb93/Operacion_Camaron__2021__EspK.avi'},
+  { id:'CAPITULO 5', title:'CAPITULO 5', year:2023, genre:'TEMPORADA 14', poster:'https://images.justwatch.com/poster/323007765/s166/temporada-14.avif', link:'https://filemoon.to/d/6pw5xl6tja89/Cuerpo_escombro__2024__K_Bluray_720p_Esp_wolfmax4k.com_.mkv'},
+  { id:'CAPITULO 6', title:'CAPITULO 6', year:2023, genre:'TEMPORADA 14', poster:'https://images.justwatch.com/poster/323007765/s166/temporada-14.avif', link:'https://filemoon.to/d/l33wj0xx9aft/Matusalen__2024___BlurayK_720p_esp_.mkv'},
+  { id:'CAPITULO 7', title:'CAPITULO 7', year:2023, genre:'TEMPORADA 14', poster:'https://images.justwatch.com/poster/323007765/s166/temporada-14.avif', link:'https://filemoon.to/d/d4kqm2oqjufy/Ocho_apellidos_marroqu_sK__HDR__2023.mp4'},  
+  { id:'CAPITULO 8', title:'CAPITULO 8', year:2023, genre:'TEMPORADA 14', poster:'https://images.justwatch.com/poster/323007765/s166/temporada-14.avif', link:'https://filemoon.to/d/tuzmquannb93/Operacion_Camaron__2021_K_Esp.avi'},
+
+  { id:'TODOS', title:'CAPITULOS ANTIGUOS', year:2022, genre:'TODOS', poster:'https://upload.wikimedia.org/wikipedia/commons/0/09/LaQueSeAvecina.jpg', link:'https://cuatro.comunidadmontepinar.eu/'},
+];
+
+// ===== Variables =====
+let itemsPerPage = 50; 
+let moviePage = 1;
+let filteredData = mediaData;
+let movieFocus = 0;
+
+// ===== Elementos =====
+const searchEl = document.getElementById('search');
+const genreEl = document.getElementById('genre-filter');
+const yearEl = document.getElementById('filterYear');
+const moviesEl = document.getElementById('movies-grid');
+const moviesPagEl = document.getElementById('movies-pagination');
+
+// ===== Filtros dinámicos =====
+[...new Set(mediaData.map(i=>i.year))].sort((a,b)=>b-a).forEach(y=>{
+  const o=document.createElement('option'); o.value=y; o.textContent=y; yearEl.appendChild(o);
+});
+
+// ===== Render películas =====
+function renderMovies(data){
+  const movies = data;
+  const totalPages = Math.ceil(movies.length/itemsPerPage) || 1;
+  if(moviePage>totalPages) moviePage=totalPages;
+
+  const start = (moviePage-1)*itemsPerPage;
+  const end = start + itemsPerPage;
+
+  moviesEl.innerHTML='';
+  movies.slice(start,end).forEach((item, idx)=>{
+    const div=document.createElement('div');
+    div.className='card'; div.tabIndex=0;
+    div.dataset.index = idx;
+    div.innerHTML=`<img class="img" src="${item.poster}">
+                     <div class="info">
+                       <div class="title">${item.title}</div>
+                       <div class="meta">${item.year} • ${item.genre}</div>
+                     </div>`;
+    div.onclick=()=>window.open(item.link,'_blank');
+    moviesEl.appendChild(div);
+  });
+
+  // Paginación
+  moviesPagEl.innerHTML='';
+  for(let i=1;i<=totalPages;i++){
+    const btn=document.createElement('button'); btn.textContent=i;
+    if(i===moviePage) btn.classList.add('active');
+    btn.onclick=()=>{ moviePage=i; movieFocus=0; renderMovies(filteredData); };
+    moviesPagEl.appendChild(btn);
+  }
+
+  setFocus(movieFocus);
+}
+
+// ===== Filtros =====
+function applyFilters(){
+  const q = searchEl.value.toLowerCase();
+  const genre = genreEl.value;
+  const year = yearEl.value;
+
+  filteredData = mediaData.filter(m=>
+    (genre==='all'||m.genre===genre) &&
+    (!year||String(m.year)===year) &&
+    m.title.toLowerCase().includes(q)
+  );
+  moviePage=1;
+  movieFocus=0;
+  renderMovies(filteredData);
+}
+
+searchEl.oninput=genreEl.onchange=yearEl.onchange=applyFilters;
+
+// ===== Foco teclado con paginación y desplazamiento =====
+function setFocus(idx){
+  const cards = moviesEl.querySelectorAll('.card');
+  if(cards[idx]){
+    cards[idx].focus();
+    // Desplazamiento horizontal si está fuera de la vista
+    const rect = cards[idx].getBoundingClientRect();
+    const gridRect = moviesEl.getBoundingClientRect();
+    if(rect.left < gridRect.left) moviesEl.scrollLeft -= (gridRect.left - rect.left + 10);
+    if(rect.right > gridRect.right) moviesEl.scrollLeft += (rect.right - gridRect.right + 10);
+  }
+}
+
+document.addEventListener('keydown', e=>{
+  const cards = moviesEl.querySelectorAll('.card');
+  if(cards.length===0) return;
+
+  if(e.key==='ArrowRight'){
+    movieFocus++;
+    if(movieFocus>=cards.length){
+      moviePage++;
+      movieFocus=0;
+      renderMovies(filteredData);
+    } else setFocus(movieFocus);
+    e.preventDefault();
+  }
+
+  if(e.key==='ArrowLeft'){
+    movieFocus--;
+    if(movieFocus<0){
+      if(moviePage>1){
+        moviePage--;
+        renderMovies(filteredData);
+        const newCards = moviesEl.querySelectorAll('.card');
+        movieFocus = newCards.length - 1;
+        setFocus(movieFocus);
+      } else movieFocus=0;
+    } else setFocus(movieFocus);
+    e.preventDefault();
+  }
+
+  if(e.key==='ArrowDown'){
+    movieFocus += 4;
+    const cardsLength = moviesEl.querySelectorAll('.card').length;
+    if(movieFocus>=cardsLength){
+      moviePage++;
+      movieFocus = movieFocus % cardsLength;
+      renderMovies(filteredData);
+    } else setFocus(movieFocus);
+    e.preventDefault();
+  }
+
+  if(e.key==='ArrowUp'){
+    movieFocus -= 4;
+    if(movieFocus<0){
+      if(moviePage>1){
+        moviePage--;
+        renderMovies(filteredData);
+        const newCards = moviesEl.querySelectorAll('.card');
+        movieFocus = newCards.length + movieFocus;
+        setFocus(movieFocus);
+      } else movieFocus=0;
+    } else setFocus(movieFocus);
+    e.preventDefault();
+  }
+
+  if(e.key==='Enter'){ cards[movieFocus].click(); e.preventDefault(); }
+});
+
+// ===== Inicializar =====
+renderMovies(mediaData);
+</script>
+
+</body>
+</html>
+
